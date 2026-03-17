@@ -1,32 +1,27 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import connectDB from "./src/config/db.js";
+import userRoutes from "./src/routes/userRoutes.js";
+import contentRoutes from "./src/routes/contentRoutes.js";
+import seedDatabase from "./src/seed.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Main Route
-app.get("/", (req, res) => {
-  res.json({ message: "Backend is running successfully!" });
+app.use("/api/users", userRoutes);
+app.use("/api/content", contentRoutes);
+
+connectDB().then(async () => {
+    // Seed DB automatically for the hackathon MVP
+    await seedDatabase();
+
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
 });
-
-// Connect to MongoDB & Start Server
-const startServer = async () => {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log("Successfully connected to MongoDB");
-        app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-    } catch (error) {
-        console.error("Error connecting to MongoDB", error);
-        process.exit(1);
-    }
-};
-
-startServer();
