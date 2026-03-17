@@ -19,9 +19,15 @@ app.use("/api/content", contentRoutes);
 
 connectDB().then(async () => {
     // Seed DB automatically for the hackathon MVP
-    await seedDatabase();
+    try {
+        await seedDatabase();
+    } catch (err) {
+        console.error("Database Seeding Error:", err);
+    }
 
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
+}).catch((err) => {
+    console.error("MongoDB Connection Error: ", err);
 });
