@@ -5,7 +5,8 @@ const API = axios.create({
 });
 
 // User calls
-export const loginUser = (username) => API.post('/users/login', { username });
+export const loginUser = (credentials) => API.post('/auth/login', credentials);
+export const registerUser = (userData) => API.post('/auth/register', userData);
 export const getUserProfile = (username) => API.get(`/users/${username}`);
 export const updateProgress = (progressData) => API.post('/users/progress', progressData);
 export const getLeaderboard = () => API.get('/users/leaderboard');
