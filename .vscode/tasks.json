@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Frontend",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/k",
+        "cd Frontend && npm run dev"
+      ],
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": false,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "Run Backend",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/k",
+        "cd Backend && npm run dev"
+      ],
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": false,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "Run All",
+      "dependsOn": ["Run Frontend", "Run Backend"],
+      "dependsOrder": "parallel",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

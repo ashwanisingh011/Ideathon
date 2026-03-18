@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser, registerUser } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, TrendingUp, Landmark, LineChart, Wallet } from 'lucide-react';
+import { ShieldCheck, TrendingUp, Landmark, LineChart, Wallet, EyeIcon, EyeClosedIcon } from 'lucide-react';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +12,7 @@ const Login = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [showPass, setShowPass] = useState(false)
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -19,52 +20,27 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const togglePassVisibility = ()=>{
+    setShowPass(prev => !showPass)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
     try {
       if (isLogin) {
-        // Validate inputs
-        if (!formData.email && !formData.username) {
-          setError('Please enter username');
-          return;
-        }
-        if (!formData.password) {
-          setError('Please enter password');
-          return;
-        }
-
-        const credentials = { 
-          username: formData.email || formData.username, 
-          password: formData.password 
-        };
-        
-        const res = await loginUser(credentials);
+        // Use either username or email field map to username for the backend
+        const res = await loginUser({ username: formData.email || formData.username, password: formData.password });
         login(res.data);
         navigate('/home');
       } else {
-        // Validate registration inputs
-        if (!formData.username) {
-          setError('Please enter username');
-          return;
-        }
-        if (!formData.password) {
-          setError('Please enter password');
-          return;
-        }
-
-        const userData = { 
-          username: formData.username, 
-          password: formData.password 
-        };
-        
-        const res = await registerUser(userData);
+        const res = await registerUser({ username: formData.username, password: formData.password });
         login(res.data);
         navigate('/home');
       }
     } catch (err) {
-      setError(err.response?.data?.message || (isLogin ? 'Failed to login. Try again.' : 'Registration failed. Try again.'));
+      setError(isLogin ? 'Failed to login. Try again.' : 'Registration failed. Try again.');
     }
   };
 
@@ -171,19 +147,24 @@ const Login = () => {
             />
 
             {/* Password field (Both) */}
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleInputChange}
-              required
-              className="px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-duo-green focus:bg-[#F4FBF4] transition-all font-semibold text-gray-700 placeholder-gray-400"
-            />
+            <div className="relative w-full">
+              <input
+                type={showPass ? "text" : "password"}
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-duo-green focus:bg-[#F4FBF4] transition-all font-semibold text-gray-700 placeholder-gray-400 pr-12"
+              />
+              <button type="button" onClick={togglePassVisibility} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
+                {showPass ? <EyeIcon size={20} /> : <EyeClosedIcon size={20} />}
+              </button>
+            </div>
 
             <button
               type="submit"
-              className="mt-4 bg-duo-green text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_0_#58a700] hover:translate-y-[2px] hover:shadow-[0_2px_0_#58a700] active:translate-y-[4px] active:shadow-none transition-all uppercase tracking-wide text-lg"
+              className="mt-4 bg-duo-green text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_0_#58a700] active:translate-y-[2px] active:shadow-[0_2px_0_#58a700] active:translate-y-[4px] active:shadow-none transition-all uppercase tracking-wide text-lg"
             >
               {isLogin ? 'LOG IN' : 'CREATE ACCOUNT'}
             </button>
