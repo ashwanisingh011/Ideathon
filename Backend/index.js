@@ -7,6 +7,7 @@ import userRoutes from "./src/routes/userRoutes.js";
 import contentRoutes from "./src/routes/contentRoutes.js";
 import aiRoutes from "./src/routes/aiRoutes.js";
 import seedDatabase from "./src/seed.js";
+import tradingRoutes from "./src/routes/tradingRoute.js"
 
 dotenv.config();
 
@@ -15,6 +16,8 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+app.use('/api/trade', tradingRoutes);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);

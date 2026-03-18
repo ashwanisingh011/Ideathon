@@ -11,6 +11,7 @@ import Leaderboard from './pages/Leaderboard';
 import Quests from './pages/Quests';
 import { LeaderboardPlaceholder, QuestsPlaceholder } from './pages/Placeholders';
 import StoryCard from './components/StoryCard';
+import Trading from './pages/Trade';
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
           <Route path="/leaderboard" element={<Layout><Leaderboard /></Layout>} />
           <Route path="/quests" element={<Layout><Quests /></Layout>} />
           <Route path="/profile" element={<Layout><Profile /></Layout>} />
+          <Route path="/trading" element={<Layout fullWidth><Trading /></Layout>} />
 
           <Route path="/story/:moduleId" element={<StoryCard />} />
           <Route path="/module/:moduleId/lessons" element={<LessonPage />} />
