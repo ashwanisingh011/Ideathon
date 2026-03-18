@@ -1,11 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, User, ShieldCheck, Trophy, Map } from 'lucide-react';
+import { Home, User, ShieldCheck, Trophy, Map, ChartBar } from 'lucide-react';
 
 const navItems = [
     { name: 'Learn', icon: <Home size={28} />, path: '/home' },
     { name: 'Leaderboard', icon: <Trophy size={28} />, path: '/leaderboard' },
     { name: 'Quests', icon: <Map size={28} />, path: '/quests' },
+    { name: 'Trading', icon: <ChartBar size={28} />, path: '/trading' },
     { name: 'Profile', icon: <User size={28} />, path: '/profile' },
 ];
 

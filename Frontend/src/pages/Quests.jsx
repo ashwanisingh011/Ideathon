@@ -2,12 +2,19 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Award, Flame, Star, CheckCircle } from 'lucide-react';
 
+const getDateKey = (date = new Date()) => {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 const Quests = () => {
     const { user } = useAuth();
 
     if (!user) return null;
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = getDateKey();
     const dailyProgress = user.dailyProgress || {};
     const isTodayProgress = dailyProgress.dateKey === today;
     const todayXp = isTodayProgress ? Number(dailyProgress.xpEarned) || 0 : 0;

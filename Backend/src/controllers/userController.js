@@ -1,6 +1,15 @@
 import User from '../models/User.js';
 import Module from '../models/Module.js';
 
+const getDateKey = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const startOfDay = (date = new Date()) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
 // Get User Profile
 export const getUserProfile = async (req, res) => {
   try {
@@ -58,7 +67,8 @@ export const updateProgress = async (req, res) => {
     const safeXpGained = Number(xpGained) || 0;
     user.xp += safeXpGained;
 
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const today = getDateKey(now);
     if (!user.dailyProgress || user.dailyProgress.dateKey !== today) {
       user.dailyProgress = {
         dateKey: today,
@@ -77,6 +87,27 @@ export const updateProgress = async (req, res) => {
 
     if (newlyCompletedLesson) {
       user.dailyProgress.lessonsCompleted += 1;
+
+      const todayStart = startOfDay(now);
+      const lastActiveDate = user.lastActive ? new Date(user.lastActive) : null;
+      const lastActiveStart = lastActiveDate ? startOfDay(lastActiveDate) : null;
+
+      if (!lastActiveStart) {
+        user.currentStreak = 1;
+      } else {
+        const dayDiff = Math.round((todayStart - lastActiveStart) / (1000 * 60 * 60 * 24));
+
+        if (dayDiff <= 0) {
+          user.currentStreak = Math.max(Number(user.currentStreak) || 0, 1);
+        } else if (dayDiff === 1) {
+          user.currentStreak = (Number(user.currentStreak) || 0) + 1;
+        } else {
+          user.currentStreak = 1;
+        }
+      }
+
+      user.highestStreak = Math.max(Number(user.highestStreak) || 0, Number(user.currentStreak) || 0);
+      user.lastActive = now;
     }
 
     // Example badge logic
