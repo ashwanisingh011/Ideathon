@@ -44,3 +44,5 @@ export const updateProgress = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Get Stats (streak, xp, achievements/badges)

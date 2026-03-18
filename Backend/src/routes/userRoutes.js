@@ -5,5 +5,6 @@ const router = express.Router();
 
 router.get('/:username', getUserProfile);
 router.post('/progress', updateProgress);
+// router.get('/stats/:username' , getUserStats);
 
 export default router;
