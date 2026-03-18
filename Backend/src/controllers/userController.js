@@ -1,47 +1,5 @@
 import User from '../models/User.js';
 
-// Simple login/register based on username
-export const loginUser = async (req, res) => {
-  const { username } = req.body;
-  if (!username) {
-    return res.status(400).json({ message: 'Username is required' });
-  }
-
-  try {
-    let user = await User.findOne({ username });
-
-    if (!user) {
-      user = await User.create({ username });
-    } else {
-      // Check and update streak logic here (simplified for MVP)
-      const now = new Date();
-      const lastActive = new Date(user.lastActive);
-
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const lastActiveDate = new Date(lastActive.getFullYear(), lastActive.getMonth(), lastActive.getDate());
-
-      const diffTime = Math.abs(today - lastActiveDate);
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 1) {
-        user.currentStreak += 1;
-        if (user.currentStreak > user.highestStreak) {
-          user.highestStreak = user.currentStreak;
-        }
-      } else if (diffDays > 1) {
-        user.currentStreak = 1; // reset streak, but since they logged in today it's 1
-      }
-
-      user.lastActive = now;
-      await user.save();
-    }
-
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 // Get User Profile
 export const getUserProfile = async (req, res) => {
   try {
