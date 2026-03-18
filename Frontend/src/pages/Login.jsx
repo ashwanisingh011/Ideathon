@@ -45,15 +45,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F4FBF4] font-sans">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 font-sans">
       
       {/* LEFT SIDE: App Info */}
-      <div className="w-full md:w-[70%] bg-[#064E3B] text-white p-8 md:p-16 flex flex-col justify-center relative overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#047857] rounded-full opacity-30 blur-3xl"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#059669] rounded-full opacity-30 blur-3xl"></div>
+      <div className="w-full md:w-[70%] bg-green-900 text-white p-8 md:p-16 flex flex-col justify-center relative overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-green-800 rounded-full opacity-30 blur-3xl"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-green-700 rounded-full opacity-30 blur-3xl"></div>
         
         <div className="z-10 max-w-4xl mx-auto md:mx-0">
-          <div className="mb-8 flex space-x-4 sm:space-x-6 text-[#34D399]">
+          <div className="mb-8 flex space-x-4 sm:space-x-6 text-green-400">
             <Landmark size={56} className="animate-pulse" />
             <TrendingUp size={56} />
             <Wallet size={56} />
@@ -62,25 +62,25 @@ const Login = () => {
           <h1 className="text-5xl sm:text-7xl font-extrabold mb-4 tracking-tight">
             Viksit Bharat
           </h1>
-          <h2 className="text-2xl sm:text-4xl font-bold mb-8 text-[#6EE7B7]">
+          <h2 className="text-2xl sm:text-4xl font-bold mb-8 text-green-300">
             Learn to Earn. Grow the Nation.
           </h2>
           
-          <p className="text-lg sm:text-xl text-green-50 mb-8 leading-relaxed max-w-2xl font-medium">
+          <p className="text-lg sm:text-xl text-green-100 mb-8 leading-relaxed max-w-2xl font-medium">
             A gamified finance learning app designed specifically for high school students. 
             Level up your financial literacy and prepare for the real world.
           </p>
 
-          <div className="space-y-6 text-green-100 text-lg">
+          <div className="space-y-6 text-green-200 text-lg">
             <div className="flex items-start">
-              <ShieldCheck className="mr-4 text-[#34D399] shrink-0 mt-1" size={28} />
+              <ShieldCheck className="mr-4 text-green-400 shrink-0 mt-1" size={28} />
               <p>Master the secure use of <strong>UPI</strong> and everyday digital transactions.</p>
             </div>
             <div className="flex items-start">
-              <Landmark className="mr-4 text-[#34D399] shrink-0 mt-1" size={28} />
+              <Landmark className="mr-4 text-green-400 shrink-0 mt-1" size={28} />
               <p>Demystify complex <strong>taxation terms</strong> into simple, bite-sized lessons.</p>
             </div>
-            <div className="flex items-start bg-[#047857] p-4 rounded-2xl border border-[#10B981]">
+            <div className="flex items-start bg-green-800 p-4 rounded-2xl border border-green-600">
               <LineChart className="mr-4 text-white shrink-0 mt-1" size={28} />
               <p className="text-white font-semibold">
                 Coming Soon: Live Dummy Market! Build and track your own portfolio risk-free with virtual money.
@@ -91,15 +91,15 @@ const Login = () => {
       </div>
 
       {/* RIGHT SIDE: Auth Form */}
-      <div className="w-full md:w-[30%] flex flex-col justify-center items-center bg-white p-8 sm:p-12 shadow-2xl z-20 rounded-t-3xl md:rounded-none -mt-8 md:mt-0 relative">
+      <div className="w-full md:w-[30%] flex flex-col justify-center items-center bg-gray-50 p-8 sm:p-12 shadow-2xl z-20 rounded-t-3xl md:rounded-none -mt-8 md:mt-0 relative">
         
         {/* Segment Control (Login vs Register) */}
-        <div className="w-full max-w-sm flex bg-green-50 rounded-2xl p-1 mb-8 shadow-inner">
+        <div className="w-full max-w-sm flex bg-gray-200 rounded-2xl p-1 mb-8 shadow-inner">
           <button
             onClick={() => { setIsLogin(true); setError(''); }}
             className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 ${
               isLogin 
-                ? 'bg-white shadow-md text-[#064E3B]' 
+                ? 'bg-white shadow-md text-green-900' 
                 : 'text-gray-500 hover:text-green-700'
             }`}
           >
@@ -109,7 +109,7 @@ const Login = () => {
             onClick={() => { setIsLogin(false); setError(''); }}
             className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 ${
               !isLogin 
-                ? 'bg-white shadow-md text-[#064E3B]' 
+                ? 'bg-white shadow-md text-green-900' 
                 : 'text-gray-500 hover:text-green-700'
             }`}
           >
@@ -118,7 +118,7 @@ const Login = () => {
         </div>
 
         <div className="w-full max-w-sm">
-          {error && <p className="text-red-500 mb-4 text-center font-bold bg-red-50 py-2 rounded-lg">{error}</p>}
+          {error && <p className="text-red-500 mb-4 text-center font-bold bg-red-100 py-2 rounded-lg">{error}</p>}
           
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
             
@@ -131,7 +131,7 @@ const Login = () => {
                 value={formData.username}
                 onChange={handleInputChange}
                 required
-                className="px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-duo-green focus:bg-[#F4FBF4] transition-all font-semibold text-gray-700 placeholder-gray-400"
+                className="px-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-duo-green focus:bg-gray-100 transition-all font-semibold text-gray-700 placeholder-gray-400"
               />
             )}
 
@@ -143,7 +143,7 @@ const Login = () => {
               value={formData.email}
               onChange={handleInputChange}
               required
-              className="px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-duo-green focus:bg-[#F4FBF4] transition-all font-semibold text-gray-700 placeholder-gray-400"
+              className="px-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-duo-green focus:bg-gray-100 transition-all font-semibold text-gray-700 placeholder-gray-400"
             />
 
             {/* Password field (Both) */}
@@ -155,7 +155,7 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-duo-green focus:bg-[#F4FBF4] transition-all font-semibold text-gray-700 placeholder-gray-400 pr-12"
+                className="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-duo-green focus:bg-gray-100 transition-all font-semibold text-gray-700 placeholder-gray-400 pr-12"
               />
               <button type="button" onClick={togglePassVisibility} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
                 {showPass ? <EyeIcon size={20} /> : <EyeClosedIcon size={20} />}

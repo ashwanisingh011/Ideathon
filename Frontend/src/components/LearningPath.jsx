@@ -18,14 +18,14 @@ const PathNode = ({ module, index, state }) => {
     let shadowClasses = "";
 
     if (state === 'LOCKED') {
-        btnClasses += " bg-[#E5E5E5] border-[#E5E5E5] text-gray-400 opacity-80";
-        shadowClasses = "shadow-[0_8px_0_#B3B3B3]";
+        btnClasses += " bg-gray-800 border-gray-700 text-gray-600 opacity-80";
+        shadowClasses = "shadow-[0_8px_0_#1f2937]";
     } else if (state === 'CURRENT') {
-        btnClasses += " bg-duo-green border-white text-white z-10 animate-pulse ring-[6px] ring-duo-green/40";
-        shadowClasses = "shadow-[0_8px_0_#58A700] hover:translate-y-[2px] hover:shadow-[0_6px_0_#58A700] active:translate-y-[8px] active:shadow-none";
+        btnClasses += " bg-duo-green border-white text-white z-10 animate-pulse-dark ring-[6px] ring-duo-green/40 hover:bg-duo-green-dark";
+        shadowClasses = "shadow-[0_8px_0_#2e7d32] active:translate-y-[8px] active:shadow-none";
     } else if (state === 'COMPLETED') {
-        btnClasses += " bg-[#FFC800] border-[#FFC800] text-white";
-        shadowClasses = "shadow-[0_8px_0_#D7A700] hover:translate-y-[2px] hover:shadow-[0_6px_0_#D7A700] active:translate-y-[8px] active:shadow-none";
+        btnClasses += " bg-duo-yellow border-white text-white shadow-xl";
+        shadowClasses = "shadow-[0_8px_0_#f9a825] active:translate-y-[8px] active:shadow-none";
     }
 
     const handleClick = () => {
@@ -114,20 +114,24 @@ const LearningPath = ({ modules }) => {
     };
 
     return (
-        <div className="flex flex-col w-full pb-20">
+        <div className="flex flex-col w-full pb-20 max-w-2xl mx-auto">
             {units.map((unit, unitIdx) => (
                 <div key={unitIdx} className="mb-12">
                     {/* Unit Header */}
-                    <div className={`w-full ${unit.bgColor} p-6 mb-8 text-white relative flex justify-between items-center`}>
-                        <div>
-                            <h2 className="font-extrabold text-2xl uppercase tracking-wider mb-1">Unit {unitIdx + 1}</h2>
-                            <p className="font-bold text-lg opacity-90">{unit.title}</p>
-                            <p className="font-semibold text-sm opacity-80">{unit.subtitle}</p>
+                    <div className={`mx-4 rounded-2xl ${unit.bgColor} p-6 mb-10 text-white relative shadow-lg border-b-4 border-black/30 transform transition-transform hover:scale-[1.01]`}>
+                        <div className="relative z-10">
+                            <h2 className="font-black text-xl uppercase tracking-widest mb-1 opacity-70">Unit {unitIdx + 1}</h2>
+                            <p className="font-extrabold text-2xl mb-1">{unit.title}</p>
+                            <p className="font-bold text-sm opacity-90">{unit.subtitle}</p>
+                        </div>
+                        {/* Decorative Background Element */}
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none">
+                            <Star size={80} fill="white" />
                         </div>
                     </div>
 
                     {/* Winding Path Nodes */}
-                    <div className="flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center justify-center space-y-2">
                         {unit.modules.map((mod, i) => {
                             const state = getNodeState(mod);
                             const node = <PathNode key={mod._id} module={mod} index={i} state={state} />;

@@ -138,14 +138,14 @@ const LessonPage = () => {
     const progressPercent = ((currentIndex) / questions.length) * 100;
 
     return (
-        <div className="min-h-screen bg-white flex flex-col">
+        <div className="min-h-screen bg-gray-800 flex flex-col">
 
             {/* Top Progress Bar */}
             <div className="p-4 flex items-center space-x-4">
-                <button onClick={() => navigate('/home')} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => navigate('/home')} className="text-gray-400 hover:text-gray-200">
                     <X size={24} />
                 </button>
-                <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                <div className="flex-1 h-4 bg-gray-700 rounded-full overflow-hidden">
                     <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${progressPercent}%` }}
@@ -177,7 +177,7 @@ const LessonPage = () => {
                         exit={{ x: -50, opacity: 0 }}
                         className="w-full max-w-md"
                     >
-                        <p className="text-xl font-semibold mb-8 text-gray-700">{currentQ.text}</p>
+                        <p className="text-xl font-semibold mb-8 text-gray-300">{currentQ.text}</p>
 
                         <div className="space-y-4">
                             {currentQ.options.map((opt, idx) => {
@@ -186,15 +186,15 @@ const LessonPage = () => {
 
                                 if (!isAnswerChecked) {
                                     btnClasses += isSelected
-                                        ? "border-duo-blue bg-blue-50 text-duo-blue shadow-duo-blue translate-y-[2px]"
-                                        : "border-gray-200 text-gray-700 hover:bg-gray-50 shadow-gray-200 hover:border-gray-300";
+                                        ? "border-duo-blue bg-blue-900 text-duo-blue shadow-duo-blue-dark translate-y-[2px]"
+                                        : "border-gray-600 text-gray-300 hover:bg-gray-700 shadow-gray-700 hover:border-gray-500";
                                 } else {
                                     if(idx === currentQ.correctOptionIndex) {
-                                        btnClasses += "border-duo-green bg-green-50 text-duo-green shadow-duo-green";
+                                        btnClasses += "border-duo-green bg-green-900 text-duo-green shadow-duo-green-dark";
                                     } else if(isSelected) {
-                                        btnClasses += "border-red-400 bg-red-50 text-red-500 shadow-red-400";
+                                        btnClasses += "border-red-400 bg-red-900 text-red-400 shadow-red-500";
                                     } else {
-                                        btnClasses += "border-gray-200 text-gray-400 shadow-gray-200 opacity-50";
+                                        btnClasses += "border-gray-600 text-gray-500 shadow-gray-700 opacity-50";
                                     }
                                 }
 
@@ -215,7 +215,7 @@ const LessonPage = () => {
             </div>
 
             {/* Bottom Check Bar */}
-            <div className={`p-6 border-t-2 border-gray-200 flex flex-col items-center justify-between min-h-[140px] transition-colors ${isAnswerChecked ? (isCorrect ? 'bg-green-100' : 'bg-red-100') : 'bg-white'}`}>
+            <div className={`p-6 border-t-2 border-gray-700 flex flex-col items-center justify-between min-h-[140px] transition-colors ${isAnswerChecked ? (isCorrect ? 'bg-green-900' : 'bg-red-900') : 'bg-gray-800'}`}>
 
                 {isAnswerChecked && (
                     <div className={`w-full max-w-md flex font-bold text-xl mb-4 ${isCorrect ? 'text-duo-green-dark' : 'text-red-500'}`}>
@@ -231,7 +231,7 @@ const LessonPage = () => {
                     <button
                         onClick={handleCheck}
                         disabled={selectedOption === null}
-                        className={`w-full max-w-md text-white font-bold py-4 rounded-xl text-lg shadow-[0_4px_0_0] active:translate-y-[4px] active:shadow-none transition-all ${selectedOption !== null ? 'bg-duo-green shadow-[#58a700]' : 'bg-gray-300 shadow-[#b3b3b3] text-gray-400'}`}
+                        className={`w-full max-w-md text-white font-bold py-4 rounded-xl text-lg shadow-[0_4px_0_0] active:translate-y-[4px] active:shadow-none transition-all ${selectedOption !== null ? 'bg-duo-green shadow-duo-green-dark' : 'bg-gray-600 shadow-gray-700 text-gray-400'}`}
                     >
                         CHECK
                     </button>
