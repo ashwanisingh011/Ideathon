@@ -25,17 +25,21 @@ const Login = () => {
     
     try {
       if (isLogin) {
-        // Use either username or email field map to username for the backend
-        const res = await loginUser({ username: formData.email || formData.username, password: formData.password });
+        const loginIdentifier = (formData.email || '').trim();
+        const res = await loginUser({ identifier: loginIdentifier, password: formData.password });
         login(res.data);
         navigate('/home');
       } else {
-        const res = await registerUser({ username: formData.username, password: formData.password });
+        const res = await registerUser({
+          username: formData.username.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+        });
         login(res.data);
         navigate('/home');
       }
     } catch (err) {
-      setError(isLogin ? 'Failed to login. Try again.' : 'Registration failed. Try again.');
+      setError(err?.response?.data?.message || (isLogin ? 'Failed to login. Try again.' : 'Registration failed. Try again.'));
     }
   };
 

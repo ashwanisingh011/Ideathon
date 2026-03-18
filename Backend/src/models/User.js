@@ -17,6 +17,7 @@ const dailyContestEntrySchema = new mongoose.Schema({
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   refreshToken: { type: String },
   xp: { type: Number, default: 0 },
   currentStreak: { type: Number, default: 0 },
