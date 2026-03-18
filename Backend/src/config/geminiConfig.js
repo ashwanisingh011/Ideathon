@@ -237,22 +237,12 @@ Return strictly a valid JSON array with this structure:
 ]
 Do not include markdown or extra commentary.`;
 
-  const fallbackCards = [
-    { title: `${safeTitle}: Core Idea`, text: `Understand the basic concept of ${safeTitle} with practical examples from daily life.`, order: 1 },
-    { title: `${safeTitle}: Common Mistakes`, text: `Learn the most frequent mistakes students make and how to avoid them safely.`, order: 2 },
-    { title: `${safeTitle}: Smart Decision`, text: `Apply one simple decision framework to choose the safest and smartest action.`, order: 3 },
-    { title: `${safeTitle}: Practice Check`, text: `Use a quick mental checklist before every real-world transaction or decision.`, order: 4 },
-  ];
+  const cards = await generateQuestionsWithFallback(prompt, parseLearningCardsJson);
+  const normalizedCards = normalizeLearningCards(cards).slice(0, safeCount);
 
-  try {
-    const cards = await generateQuestionsWithFallback(prompt, parseLearningCardsJson);
-    const normalizedCards = normalizeLearningCards(cards).slice(0, safeCount);
-    if (normalizedCards.length) {
-      return normalizedCards;
-    }
-  } catch (error) {
-    console.warn('Learning card generation failed, using fallback cards:', error.message);
+  if (!normalizedCards.length) {
+    throw new Error('AI returned empty learning cards');
   }
 
-  return normalizeLearningCards(fallbackCards).slice(0, safeCount);
+  return normalizedCards;
 };

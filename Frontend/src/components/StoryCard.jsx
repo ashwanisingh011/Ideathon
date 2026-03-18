@@ -21,8 +21,8 @@ const mapSlides = (cards = []) => cards.map((card, index) => ({
 
 const fallbackSlide = {
     id: 1,
-    title: 'Ready to Learn',
-    text: 'Your personalized learning cards are being prepared. Continue to start your lesson.',
+    title: 'AI Content Unavailable',
+    text: 'We could not generate AI learning content right now. Please try again in a moment.',
     color: 'bg-duo-blue',
 };
 
@@ -69,21 +69,7 @@ const StoryCard = () => {
                 const mappedGenerated = mapSlides(generatedCards);
                 setSlides(mappedGenerated.length ? mappedGenerated : [fallbackSlide]);
             } catch (error) {
-                try {
-                    const fallback = await getModuleContentBundle(moduleId);
-                    const fallbackCards = fallback.data?.module?.learningCards || [];
-                    const mappedFallback = mapSlides(fallbackCards);
-                    setSlides(mappedFallback.length ? mappedFallback : [fallbackSlide]);
-                } catch (fallbackError) {
-                    setSlides([
-                        {
-                            id: 1,
-                            title: 'Learning Journey',
-                            text: 'We are preparing your personalized learning cards. Tap to continue to questions.',
-                            color: 'bg-duo-blue',
-                        },
-                    ]);
-                }
+                setSlides([fallbackSlide]);
             } finally {
                 setLoading(false);
             }
@@ -110,6 +96,12 @@ const StoryCard = () => {
     }, [currentSlide, loading, slides.length]);
 
     const handleNextSlide = () => {
+        const isErrorSlide = slides.length === 1 && slides[0]?.title === 'AI Content Unavailable';
+        if (isErrorSlide) {
+            navigate('/home');
+            return;
+        }
+
         if (currentSlide < slides.length - 1) {
             setCurrentSlide(currentSlide + 1);
             setProgress(0);
