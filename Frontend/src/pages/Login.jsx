@@ -25,21 +25,46 @@ const Login = () => {
     
     try {
       if (isLogin) {
-        const loginIdentifier = (formData.email || '').trim();
-        const res = await loginUser({ identifier: loginIdentifier, password: formData.password });
+        // Validate inputs
+        if (!formData.email && !formData.username) {
+          setError('Please enter username');
+          return;
+        }
+        if (!formData.password) {
+          setError('Please enter password');
+          return;
+        }
+
+        const credentials = { 
+          username: formData.email || formData.username, 
+          password: formData.password 
+        };
+        
+        const res = await loginUser(credentials);
         login(res.data);
         navigate('/home');
       } else {
-        const res = await registerUser({
-          username: formData.username.trim(),
-          email: formData.email.trim(),
-          password: formData.password,
-        });
+        // Validate registration inputs
+        if (!formData.username) {
+          setError('Please enter username');
+          return;
+        }
+        if (!formData.password) {
+          setError('Please enter password');
+          return;
+        }
+
+        const userData = { 
+          username: formData.username, 
+          password: formData.password 
+        };
+        
+        const res = await registerUser(userData);
         login(res.data);
         navigate('/home');
       }
     } catch (err) {
-      setError(err?.response?.data?.message || (isLogin ? 'Failed to login. Try again.' : 'Registration failed. Try again.'));
+      setError(err.response?.data?.message || (isLogin ? 'Failed to login. Try again.' : 'Registration failed. Try again.'));
     }
   };
 
