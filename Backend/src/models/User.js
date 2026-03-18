@@ -1,5 +1,19 @@
 import mongoose from 'mongoose';
 
+const dailyContestQuestionSchema = new mongoose.Schema({
+  question: { type: String, required: true },
+  options: [{ type: String, required: true }],
+  correctAnswer: { type: Number, required: true },
+  explanation: { type: String, default: '' },
+}, { _id: false });
+
+const dailyContestEntrySchema = new mongoose.Schema({
+  date: { type: String, required: true },
+  topic: { type: String, default: 'financial literacy' },
+  questions: { type: [dailyContestQuestionSchema], default: [] },
+  generatedAt: { type: Date, default: Date.now },
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -14,7 +28,8 @@ const userSchema = new mongoose.Schema({
   badges: [{
     name: { type: String, enum: ['Digital Defender', 'Wealth Weaver', 'Nation Builder'] },
     unlockedAt: { type: Date, default: Date.now }
-  }]
+  }],
+  dailyContests: { type: [dailyContestEntrySchema], default: [] },
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);
