@@ -17,8 +17,16 @@ const Profile = () => {
     useEffect(() => {
         if(!user) return navigate('/');
         const fetchProfile = async () => {
-            const res = await getUserProfile(user.username);
-            setUser(res.data);
+            try {
+                const res = await getUserProfile(user.username);
+                setUser(res.data);
+            } catch (err) {
+                console.error(err);
+                if (err.response && err.response.status === 404) {
+                    logout();
+                    navigate('/');
+                }
+            }
         };
         fetchProfile();
     }, []);
