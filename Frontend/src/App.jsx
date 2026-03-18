@@ -24,7 +24,7 @@ const App = () => {
           <Route path="/leaderboard" element={<Layout><Leaderboard /></Layout>} />
           <Route path="/quests" element={<Layout><Quests /></Layout>} />
           <Route path="/profile" element={<Layout><Profile /></Layout>} />
-          <Route path="/trading" element={<Layout><Trading /></Layout>} />
+          <Route path="/trading" element={<Layout fullWidth><Trading /></Layout>} />
 
           <Route path="/story/:moduleId" element={<StoryCard />} />
           <Route path="/module/:moduleId/lessons" element={<LessonPage />} />

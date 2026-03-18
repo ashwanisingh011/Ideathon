@@ -22,7 +22,7 @@ export const generateQuestionsData = (data) => API.post('/ai/generate-question',
 export const generateDailyContestData = (data) => API.post('/ai/daily-contest', data);
 export const generateModuleAIContent = (moduleId, data) => API.post(`/ai/module-content/${moduleId}`, data);
 export const getCurrentDayContestQuestions = (username, count = 5) =>
-    API.get(`/ai/daily-contest/${username}/current`, { params: { count } });
+    API.get(`/ai/daily-contest/${username}/current`, { params: { count } });    
 
 
 // ── Trading calls (add these to your existing api.js) ──────────────────────

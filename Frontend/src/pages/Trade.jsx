@@ -160,8 +160,8 @@ const Trading = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: duo.bg }}>
-      <div style={{ maxWidth: '768px', margin: '0 auto', minHeight: '100vh', background: duo.white, fontFamily: "'Nunito', sans-serif", paddingBottom: 80 }}>
+    <div style={{ minHeight: '100vh', width: '100%', background: duo.bg }}>
+      <div style={{ width: '100%', minHeight: '100vh', background: duo.white, fontFamily: "'Nunito', sans-serif", paddingBottom: 80, boxSizing: 'border-box' }}>
       <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
 
       {/* Toast */}

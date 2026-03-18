@@ -10,7 +10,7 @@ const navItems = [
     { name: 'Profile', icon: <User size={28} />, path: '/profile' },
 ];
 
-const Layout = ({ children }) => {
+const Layout = ({ children, fullWidth = false }) => {
     return (
         <div className="flex h-screen bg-white md:bg-gray-100 overflow-hidden font-sans">
 
@@ -40,8 +40,8 @@ const Layout = ({ children }) => {
             </aside>
 
             {/* Main Content Area (Scrollable Column) */}
-            <main className="flex-1 h-full overflow-y-auto w-full flex justify-center pb-24 md:pb-0">
-                <div className="w-full max-w-[600px] bg-white min-h-full border-x-0 md:border-x-2 border-gray-200 shadow-sm relative">
+            <main className={`flex-1 h-full overflow-y-auto w-full pb-24 md:pb-0 ${fullWidth ? '' : 'flex justify-center'}`}>
+                <div className={`w-full bg-white min-h-full relative ${fullWidth ? '' : 'max-w-[600px] border-x-0 md:border-x-2 border-gray-200 shadow-sm'}`}>
                     {children}
                 </div>
             </main>
