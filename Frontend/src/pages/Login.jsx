@@ -164,7 +164,7 @@ const Login = () => {
 
             <button
               type="submit"
-              className="mt-4 bg-duo-green text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_0_#58a700] active:translate-y-[2px] active:shadow-[0_2px_0_#58a700] active:translate-y-[4px] active:shadow-none transition-all uppercase tracking-wide text-lg"
+              className="mt-4 bg-duo-green text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_0_#58a700] active:translate-y-[2px] active:shadow-none transition-all uppercase tracking-wide text-lg"
             >
               {isLogin ? 'LOG IN' : 'CREATE ACCOUNT'}
             </button>
