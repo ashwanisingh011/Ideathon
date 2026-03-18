@@ -5,6 +5,7 @@ import connectDB from "./src/config/db.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import contentRoutes from "./src/routes/contentRoutes.js";
+import aiRoutes from "./src/routes/aiRoutes.js";
 import seedDatabase from "./src/seed.js";
 
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/content", contentRoutes);
+app.use("/api/ai", aiRoutes);
 
 connectDB().then(async () => {
     // Seed DB automatically for the hackathon MVP

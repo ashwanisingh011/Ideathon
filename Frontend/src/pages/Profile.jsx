@@ -77,7 +77,7 @@ const Profile = () => {
                 <div className="mt-8">
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Achievements</h2>
                     <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 grid grid-cols-3 gap-4">
-                        {user.badges.length > 0 ? (
+                        {user.badges?.length > 0 ? (
                             user.badges.map((b, i) => (
                                 <div key={i} className="flex flex-col items-center text-center">
                                     <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-2 border-2 border-blue-200">
