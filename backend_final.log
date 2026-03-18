@@ -1,0 +1,8 @@
+
+> backend@1.0.0 start
+> node index.js
+
+[dotenv@17.3.1] injecting env (2) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+MongoDB Connected: ac-m0v279t-shard-00-01.gamp2dg.mongodb.net
+Database already seeded. Skipping...
+Server running on port 5000

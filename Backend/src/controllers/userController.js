@@ -59,6 +59,19 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
+// Get Leaderboard
+export const getLeaderboard = async (req, res) => {
+  try {
+    const users = await User.find()
+      .sort({ xp: -1 })
+      .limit(15)
+      .select('username xp currentStreak');
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Update Progress (after a lesson)
 export const updateProgress = async (req, res) => {
   const { username, lessonId, xpGained, moduleId } = req.body;

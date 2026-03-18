@@ -16,6 +16,9 @@ const LessonPage = () => {
     const [isAnswerChecked, setIsAnswerChecked] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [attemptsLeft, setAttemptsLeft] = useState(2);
+    const [shake, setShake] = useState(false);
+    const [earnedXP, setEarnedXP] = useState(0);
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -42,8 +45,31 @@ const LessonPage = () => {
         if(selectedOption === null) return;
         const currentQ = questions[currentIndex];
         const correct = selectedOption === currentQ.correctOptionIndex;
+
         setIsCorrect(correct);
         setIsAnswerChecked(true);
+
+        if (correct) {
+            // Give XP based on attempts left BEFORE this check
+            // If they had 2 attempts left when they answered, they get 10 XP.
+            // If they had 1 attempt left, they get 5 XP.
+            let xpToGaint = 0;
+            if (attemptsLeft === 2) xpToGaint = 10;
+            else if (attemptsLeft === 1) xpToGaint = 5;
+
+            setEarnedXP(prev => prev + xpToGaint);
+        } else {
+            setShake(true);
+            setTimeout(() => setShake(false), 500);
+            if (attemptsLeft > 0) {
+                setAttemptsLeft(prev => prev - 1);
+            }
+        }
+    };
+
+    const handleRetry = () => {
+        setIsAnswerChecked(false);
+        setSelectedOption(null);
     };
 
     const handleNext = async () => {
@@ -51,13 +77,14 @@ const LessonPage = () => {
             setCurrentIndex(prev => prev + 1);
             setSelectedOption(null);
             setIsAnswerChecked(false);
+            setAttemptsLeft(2);
         } else {
             // Finish lesson
             try {
                 const res = await updateProgress({
                     username: user.username,
                     lessonId: lessonData._id,
-                    xpGained: lessonData.xpReward,
+                    xpGained: earnedXP,
                     moduleId
                 });
                 setUser(res.data); // Update context with new XP
@@ -93,13 +120,19 @@ const LessonPage = () => {
 
             {/* Question Container */}
             <div className="flex-1 p-6 flex flex-col items-center">
-                <h2 className="text-2xl font-bold text-gray-800 self-start mb-6">Select the correct option</h2>
+                <div className="w-full flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">Select the correct option</h2>
+                    <span className="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-sm font-bold shadow-sm">
+                        {attemptsLeft} attempts left
+                    </span>
+                </div>
 
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentIndex}
                         initial={{ x: 50, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
+                        animate={shake ? { x: [-10, 10, -10, 10, 0] } : { x: 0, opacity: 1 }}
+                        transition={{ duration: 0.4 }}
                         exit={{ x: -50, opacity: 0 }}
                         className="w-full max-w-md"
                     >
@@ -145,7 +178,11 @@ const LessonPage = () => {
 
                 {isAnswerChecked && (
                     <div className={`w-full max-w-md flex font-bold text-xl mb-4 ${isCorrect ? 'text-duo-green-dark' : 'text-red-500'}`}>
-                        {isCorrect ? <span className="flex items-center"><Check className="mr-2" size={32}/> Excellent!</span> : <span className="flex items-center"><X className="mr-2" size={32}/> Incorrect</span>}
+                        {isCorrect ? (
+                            <span className="flex items-center"><Check className="mr-2" size={32}/> Excellent!</span>
+                        ) : (
+                            <span className="flex items-center"><X className="mr-2" size={32}/> {attemptsLeft > 0 ? 'Oops, try again!' : 'Incorrect'}</span>
+                        )}
                     </div>
                 )}
 
@@ -158,12 +195,23 @@ const LessonPage = () => {
                         CHECK
                     </button>
                 ) : (
-                    <button
-                        onClick={handleNext}
-                        className={`w-full max-w-md text-white font-bold py-4 rounded-xl text-lg shadow-[0_4px_0_0] active:translate-y-[4px] active:shadow-none transition-all ${isCorrect ? 'bg-duo-green shadow-[#58a700]' : 'bg-red-500 shadow-[#d32f2f]'}`}
-                    >
-                        CONTINUE
-                    </button>
+                    <>
+                        {isCorrect || attemptsLeft === 0 ? (
+                            <button
+                                onClick={handleNext}
+                                className={`w-full max-w-md text-white font-bold py-4 rounded-xl text-lg shadow-[0_4px_0_0] active:translate-y-[4px] active:shadow-none transition-all ${isCorrect ? 'bg-duo-green shadow-[#58a700]' : 'bg-red-500 shadow-[#d32f2f]'}`}
+                            >
+                                CONTINUE
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleRetry}
+                                className={`w-full max-w-md text-white font-bold py-4 rounded-xl text-lg shadow-[0_4px_0_0] active:translate-y-[4px] active:shadow-none transition-all bg-red-500 shadow-[#d32f2f]`}
+                            >
+                                RETRY
+                            </button>
+                        )}
+                    </>
                 )}
             </div>
 
