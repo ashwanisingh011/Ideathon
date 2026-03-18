@@ -64,21 +64,21 @@ const Home = () => {
             )}
 
             {/* Top Stats Bar */}
-            <div className="sticky top-0 bg-gray-900/80 backdrop-blur-md z-20 border-b-2 border-gray-800 p-4 flex justify-between items-center shadow-sm">
+            <div className="sticky top-0 bg-white/80 backdrop-blur-md z-20 border-b-2 border-gray-200 p-4 flex justify-between items-center shadow-sm">
                 {/* Logo visible only on mobile, desktop handled by Layout Sidebar */}
                 <div className="md:hidden font-black text-2xl text-duo-green flex items-center tracking-tighter">
                    VIKSIT
                 </div>
-                <div className="hidden md:block font-black text-gray-400 text-sm uppercase tracking-widest">
+                <div className="hidden md:block font-black text-gray-500 text-sm uppercase tracking-widest">
                     Learning Path
                 </div>
 
-                <div className="flex space-x-6 font-black text-gray-100">
-                    <div className="flex items-center space-x-2 bg-gray-800/50 px-3 py-1.5 rounded-2xl border-2 border-gray-700 shadow-inner hover:bg-gray-800 transition-colors cursor-default">
+                <div className="flex space-x-6 font-black text-gray-800">
+                    <div className="flex items-center space-x-2 bg-gray-100/50 px-3 py-1.5 rounded-2xl border-2 border-gray-200 shadow-inner hover:bg-gray-200 transition-colors cursor-default">
                         <Flame size={20} className="text-orange-500 fill-orange-500/20" />
                         <span className="text-sm">{user.currentStreak}</span>
                     </div>
-                    <div className="flex items-center space-x-2 bg-gray-800/50 px-3 py-1.5 rounded-2xl border-2 border-gray-700 shadow-inner hover:bg-gray-800 transition-colors cursor-default">
+                    <div className="flex items-center space-x-2 bg-gray-100/50 px-3 py-1.5 rounded-2xl border-2 border-gray-200 shadow-inner hover:bg-gray-200 transition-colors cursor-default">
                         <span className="text-sm font-black text-blue-400">XP</span>
                         <span className="text-sm">{user.xp}</span>
                     </div>
@@ -89,7 +89,7 @@ const Home = () => {
             <div className="w-full">
                 {modules.length > 0 ? <LearningPath modules={modules} /> : (
                     <div className="flex flex-col items-center justify-center p-20 text-gray-500 space-y-4 animate-pulse">
-                        <div className="w-16 h-16 bg-gray-800 rounded-full"></div>
+                        <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
                         <p className="font-bold tracking-widest uppercase text-xs">Loading Modules...</p>
                     </div>
                 )}

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -18,10 +17,10 @@ const PathNode = ({ module, index, state }) => {
     let shadowClasses = "";
 
     if (state === 'LOCKED') {
-        btnClasses += " bg-gray-800 border-gray-700 text-gray-600 opacity-80";
-        shadowClasses = "shadow-[0_8px_0_#1f2937]";
+        btnClasses += " bg-gray-200 border-gray-300 text-gray-400 opacity-80";
+        shadowClasses = "shadow-[0_8px_0_#e5e7eb]";
     } else if (state === 'CURRENT') {
-        btnClasses += " bg-duo-green border-white text-white z-10 animate-pulse-dark ring-[6px] ring-duo-green/40 hover:bg-duo-green-dark";
+        btnClasses += " bg-duo-green border-white text-white z-10 animate-blink ring-[6px] ring-duo-green/40 hover:animate-blink hover:bg-duo-green-dark";
         shadowClasses = "shadow-[0_8px_0_#2e7d32] active:translate-y-[8px] active:shadow-none";
     } else if (state === 'COMPLETED') {
         btnClasses += " bg-duo-yellow border-white text-white shadow-xl";
@@ -88,20 +87,19 @@ const LearningPath = ({ modules }) => {
     const getNodeState = (module) => {
         if (!user || !user.unlockedModules) return module.order <= 2 ? 'CURRENT' : 'LOCKED';
 
-        // Find index of this module in the global modules list
+        const unlockedModuleIds = new Set(user.unlockedModules.map(m => m._id || m));
+
         const currentIndex = orderedModules.findIndex(m => m._id === module._id);
 
-        // Baseline unlock: UPI + Stocks are available immediately.
         const isStarterUnlocked = module.order <= 2;
-        const isUnlockedFromProfile = user.unlockedModules.some(m => m._id === module._id || m === module._id);
-        const isUnlocked = isStarterUnlocked || isUnlockedFromProfile;
+        const isUnlocked = isStarterUnlocked || unlockedModuleIds.has(module._id);
 
         if (!isUnlocked) return 'LOCKED';
 
         // If there's a next module, check if it's unlocked
         if (currentIndex < orderedModules.length - 1) {
             const nextModule = orderedModules[currentIndex + 1];
-            const isNextUnlocked = nextModule.order <= 2 || user.unlockedModules.some(m => m._id === nextModule._id || m === nextModule._id);
+            const isNextUnlocked = (nextModule.order <= 2) || unlockedModuleIds.has(nextModule._id);
             if (isNextUnlocked) {
                 return 'COMPLETED';
             }

@@ -25,7 +25,7 @@ const Leaderboard = () => {
     }
 
     return (
-        <div className="flex flex-col h-full bg-[#F7F7F7] pb-24">
+        <div className="flex flex-col h-auto bg-[#F7F7F7] pb-24">
             <div className="sticky top-0 bg-white z-10 border-b-2 border-gray-200 p-4 shadow-sm text-center">
                 <h1 className="font-bold text-xl text-gray-700">Leaderboard</h1>
             </div>

@@ -34,60 +34,60 @@ const Profile = () => {
     if(!user) return null;
 
     return (
-        <div className="min-h-screen bg-gray-900 pb-24">
+        <div className="min-h-screen bg-gray-100 pb-24">
                         {/* Top Bar */}
-                        <div className="sticky top-0 bg-gray-800 z-10 border-b-2 border-gray-700 p-4 flex items-center shadow-sm">
-                            <button onClick={() => navigate('/home')} className="text-gray-400 hover:text-gray-200 mr-4">
+                        <div className="sticky top-0 bg-white z-10 border-b-2 border-gray-200 p-4 flex items-center shadow-sm">
+                            <button onClick={() => navigate('/home')} className="text-gray-500 hover:text-gray-800 mr-4">
                                 <ArrowLeft size={28} />
                             </button>
-                            <div className="font-bold text-xl text-gray-200">Profile</div>
+                            <div className="font-bold text-xl text-gray-800">Profile</div>
                         </div>
             
                         <div className="p-6">
                             {/* Header Card */}
-                            <div className="bg-gray-800 rounded-2xl p-6 border-2 border-gray-700 shadow-sm flex items-center space-x-6">
-                                <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center text-gray-400">
+                            <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-sm flex items-center space-x-6">
+                                <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
                                     <UserIcon size={40} />
                                 </div>
                                 <div>
-                                    <h1 className="text-3xl font-bold text-gray-200">{user.username}</h1>
-                                    <p className="text-gray-400 font-semibold mt-1">Viksit Bharat Ambassador</p>
+                                    <h1 className="text-3xl font-bold text-gray-800">{user.username}</h1>
+                                    <p className="text-gray-500 font-semibold mt-1">Viksit Bharat Ambassador</p>
                                 </div>
                             </div>
             
                             {/* Stats Row */}
                             <div className="mt-6 grid grid-cols-2 gap-4">
-                                <div className="bg-gray-800 rounded-2xl p-4 border-2 border-gray-700 flex items-center space-x-4">
+                                <div className="bg-white rounded-2xl p-4 border-2 border-gray-200 flex items-center space-x-4">
                                     <Flame size={32} className="text-orange-500" />
                                     <div>
-                                        <div className="text-2xl font-bold text-gray-200">{user.currentStreak}</div>
-                                        <div className="text-gray-400 font-semibold text-sm">Day Streak</div>
+                                        <div className="text-2xl font-bold text-gray-800">{user.currentStreak}</div>
+                                        <div className="text-gray-500 font-semibold text-sm">Day Streak</div>
                                     </div>
                                 </div>
-                                <div className="bg-gray-800 rounded-2xl p-4 border-2 border-gray-700 flex items-center space-x-4">
+                                <div className="bg-white rounded-2xl p-4 border-2 border-gray-200 flex items-center space-x-4">
                                     <Award size={32} className="text-yellow-500" />
                                     <div>
-                                        <div className="text-2xl font-bold text-gray-200">{user.xp}</div>
-                                        <div className="text-gray-400 font-semibold text-sm">Total XP</div>
+                                        <div className="text-2xl font-bold text-gray-800">{user.xp}</div>
+                                        <div className="text-gray-500 font-semibold text-sm">Total XP</div>
                                     </div>
                                 </div>
                             </div>
             
                             {/* Badges Section */}
                             <div className="mt-8">
-                                <h2 className="text-2xl font-bold text-gray-200 mb-4">Achievements</h2>
-                                <div className="bg-gray-800 rounded-2xl p-6 border-2 border-gray-700 grid grid-cols-3 gap-4">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">Achievements</h2>
+                                <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 grid grid-cols-3 gap-4">
                                     {user.badges?.length > 0 ? (
                                         user.badges.map((b, i) => (
                                             <div key={i} className="flex flex-col items-center text-center">
-                                                <div className="w-16 h-16 rounded-full bg-blue-900 flex items-center justify-center mb-2 border-2 border-blue-800">
+                                                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-2 border-2 border-blue-200">
                                                     {badgeIcons[b.name] || <Award className="text-gray-400"/>}
                                                 </div>
-                                                <span className="font-bold text-gray-300 text-sm leading-tight">{b.name}</span>
+                                                <span className="font-bold text-gray-700 text-sm leading-tight">{b.name}</span>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="col-span-3 text-center text-gray-400 font-semibold py-4">
+                                        <div className="col-span-3 text-center text-gray-500 font-semibold py-4">
                                             Complete lessons to earn Viksit Bharat badges!
                                         </div>
                                     )}
@@ -96,7 +96,7 @@ const Profile = () => {
             
                             <button
                                 onClick={() => { logout(); navigate('/'); }}
-                                className="w-full mt-12 bg-gray-800 text-red-500 border-2 border-gray-700 font-bold py-4 rounded-xl text-lg hover:bg-gray-700 transition-colors"
+                                className="w-full mt-12 bg-white text-red-500 border-2 border-gray-200 font-bold py-4 rounded-xl text-lg hover:bg-gray-100 transition-colors"
                             >
                                 SIGN OUT
                             </button>
