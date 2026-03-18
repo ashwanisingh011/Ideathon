@@ -1,27 +1,100 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { generateModuleAIContent, getModuleContentBundle } from '../services/api';
 
-// Hardcoded story data for MVP Demo
-const storyContent = {
-    'upi-safety': [
-        { id: 1, title: 'What is UPI?', text: 'UPI is your digital wallet. It lets you send money instantly from your bank.', color: 'bg-duo-blue' },
-        { id: 2, title: 'The Golden Rule', text: 'NEVER share your UPI PIN to receive money. PIN is ONLY used when YOU are paying someone.', color: 'bg-duo-yellow-dark' },
-        { id: 3, title: 'Phishing Links', text: 'Scammers send fake "You Won ₹5000" links. Clicking them can drain your account.', color: 'bg-duo-red' },
-        { id: 4, title: 'Ready for the Test?', text: 'Let’s see if you can spot a scammer in our interactive swipe game.', color: 'bg-duo-green' }
-    ]
+const cardColors = ['bg-duo-blue', 'bg-duo-yellow-dark', 'bg-duo-red', 'bg-duo-green'];
+const FRESHNESS_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+const isFresh = (timestamp) => {
+    if (!timestamp) return false;
+    return Date.now() - new Date(timestamp).getTime() < FRESHNESS_WINDOW_MS;
+};
+
+const mapSlides = (cards = []) => cards.map((card, index) => ({
+    id: card.order || index + 1,
+    title: card.title,
+    text: card.text,
+    color: cardColors[index % cardColors.length],
+}));
+
+const fallbackSlide = {
+    id: 1,
+    title: 'Ready to Learn',
+    text: 'Your personalized learning cards are being prepared. Continue to start your lesson.',
+    color: 'bg-duo-blue',
 };
 
 const StoryCard = () => {
     const { moduleId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [currentSlide, setCurrentSlide] = useState(0);
     const [progress, setProgress] = useState(0);
-
-    // Using a default story for MVP to guarantee content loads regardless of dynamic moduleId
-    const slides = storyContent['upi-safety'];
+    const [slides, setSlides] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const loadModuleStory = async () => {
+            if (!user) {
+                navigate('/');
+                return;
+            }
+
+            try {
+                const bundleRes = await getModuleContentBundle(moduleId);
+                const bundle = bundleRes.data || {};
+                const bundleCards = bundle.module?.learningCards || [];
+                const moduleFresh = isFresh(bundle.module?.aiGeneratedAt);
+                const lessons = Array.isArray(bundle.lessons) ? bundle.lessons : [];
+                const hasQuestionsForEachLesson = lessons.length > 0 && lessons.every(
+                    (lesson) => Array.isArray(lesson.questions) && lesson.questions.length > 0
+                );
+                const hasBundleContent = bundleCards.length > 0 && hasQuestionsForEachLesson;
+
+                if (hasBundleContent && moduleFresh) {
+                    const mappedFromBundle = mapSlides(bundleCards);
+                    setSlides(mappedFromBundle.length ? mappedFromBundle : [fallbackSlide]);
+                    return;
+                }
+
+                const generated = await generateModuleAIContent(moduleId, {
+                    username: user.username,
+                    questionsPerLesson: 5,
+                    regenerate: true,
+                });
+
+                const generatedCards = generated.data?.module?.learningCards || [];
+                const mappedGenerated = mapSlides(generatedCards);
+                setSlides(mappedGenerated.length ? mappedGenerated : [fallbackSlide]);
+            } catch (error) {
+                try {
+                    const fallback = await getModuleContentBundle(moduleId);
+                    const fallbackCards = fallback.data?.module?.learningCards || [];
+                    const mappedFallback = mapSlides(fallbackCards);
+                    setSlides(mappedFallback.length ? mappedFallback : [fallbackSlide]);
+                } catch (fallbackError) {
+                    setSlides([
+                        {
+                            id: 1,
+                            title: 'Learning Journey',
+                            text: 'We are preparing your personalized learning cards. Tap to continue to questions.',
+                            color: 'bg-duo-blue',
+                        },
+                    ]);
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadModuleStory();
+    }, [moduleId, navigate, user]);
+
+    useEffect(() => {
+        if (loading || !slides.length) return;
+
         // Auto-advance progress bar simulating Instagram story timing (e.g. 5s per slide)
         const timer = setInterval(() => {
             setProgress((oldProgress) => {
@@ -34,7 +107,7 @@ const StoryCard = () => {
         }, 100);
 
         return () => clearInterval(timer);
-    }, [currentSlide]);
+    }, [currentSlide, loading, slides.length]);
 
     const handleNextSlide = () => {
         if (currentSlide < slides.length - 1) {
@@ -54,6 +127,7 @@ const StoryCard = () => {
     };
 
     const handleScreenClick = (e) => {
+        if (loading || !slides.length) return;
         const screenWidth = window.innerWidth;
         const clickX = e.clientX;
         // Tap right 70% of screen goes next, left 30% goes back
@@ -64,7 +138,19 @@ const StoryCard = () => {
         }
     };
 
-    const currentData = slides[currentSlide];
+    if (loading) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black text-white">
+                <p className="text-xl font-bold">Generating AI learning cards...</p>
+            </div>
+        );
+    }
+
+    const currentData = slides[currentSlide] || {
+        title: 'Learning Journey',
+        text: 'Tap to continue',
+        color: 'bg-duo-blue',
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">

@@ -7,27 +7,34 @@ const Quests = () => {
 
     if (!user) return null;
 
+    const today = new Date().toISOString().split('T')[0];
+    const dailyProgress = user.dailyProgress || {};
+    const isTodayProgress = dailyProgress.dateKey === today;
+    const todayXp = isTodayProgress ? Number(dailyProgress.xpEarned) || 0 : 0;
+    const todayLessons = isTodayProgress ? Number(dailyProgress.lessonsCompleted) || 0 : 0;
+    const streak = Number(user.currentStreak) || 0;
+
     const quests = [
         {
-            title: 'Daily Streak',
-            description: 'Log in and play for 1 day',
-            progress: user.currentStreak >= 1 ? 1 : 0,
-            total: 1,
-            xp: 10,
+            title: 'Streak Builder',
+            description: 'Maintain a 7-day learning streak',
+            progress: Math.min(streak, 7),
+            total: 7,
+            xp: 25,
             icon: <Flame className="text-orange-500" size={32} />
         },
         {
             title: 'XP Hunter',
             description: 'Earn 50 XP today',
-            progress: Math.min(user.xp, 50),
+            progress: Math.min(todayXp, 50),
             total: 50,
             xp: 20,
             icon: <Star className="text-yellow-500" size={32} />
         },
         {
             title: 'Knowledge Seeker',
-            description: 'Complete 3 lessons',
-            progress: Math.min(user.completedLessons.length, 3),
+            description: 'Complete 3 lessons today',
+            progress: Math.min(todayLessons, 3),
             total: 3,
             xp: 30,
             icon: <Award className="text-duo-blue" size={32} />
@@ -44,7 +51,7 @@ const Quests = () => {
                 <div className="space-y-4">
                     {quests.map((quest, index) => {
                         const isComplete = quest.progress >= quest.total;
-                        const percentage = (quest.progress / quest.total) * 100;
+                        const percentage = Math.min((quest.progress / quest.total) * 100, 100);
 
                         return (
                             <div key={index} className={`bg-white rounded-2xl p-4 border-2 ${isComplete ? 'border-duo-green-dark bg-green-50' : 'border-gray-200'} flex items-center shadow-sm`}>

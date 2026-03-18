@@ -46,6 +46,20 @@ const seedDatabase = async () => {
             xpReward: 50
         });
 
+        const stocksLesson1 = await Lesson.create({
+            moduleId: stocksModule._id,
+            title: 'Why Companies Issue Shares',
+            order: 1,
+            xpReward: 50
+        });
+
+        const taxLesson1 = await Lesson.create({
+            moduleId: taxModule._id,
+            title: 'Why We Pay Taxes',
+            order: 1,
+            xpReward: 50
+        });
+
         // 3. Create Questions for UPI Lesson 1
         await Question.create({
             lessonId: upiLesson1._id,
@@ -68,6 +82,32 @@ const seedDatabase = async () => {
             ],
             correctOptionIndex: 1,
             explanation: 'Never click on suspicious links or enter your PIN for rewards. Scammers use this to drain accounts.'
+        });
+
+        await Question.create({
+            lessonId: stocksLesson1._id,
+            text: 'A company offers shares to the public mainly to:',
+            options: [
+                'Pay personal bills of directors',
+                'Raise money for growth and operations',
+                'Avoid audits forever',
+                'Fix share price permanently'
+            ],
+            correctOptionIndex: 1,
+            explanation: 'Companies raise capital from investors to fund expansion, projects, and operations.'
+        });
+
+        await Question.create({
+            lessonId: taxLesson1._id,
+            text: 'Which statement best explains why taxes are collected?',
+            options: [
+                'Only to punish rich citizens',
+                'To fund public services like roads, schools, and healthcare',
+                'To reduce salaries',
+                'To stop private business'
+            ],
+            correctOptionIndex: 1,
+            explanation: 'Taxes help governments finance public infrastructure and essential services.'
         });
 
         console.log('Database Seeding Complete!');

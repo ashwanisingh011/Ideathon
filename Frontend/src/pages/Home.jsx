@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getModules, getUserProfile } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { Flame } from 'lucide-react';
+import { Flame, Sparkles } from 'lucide-react';
 import LearningPath from '../components/LearningPath';
 
 const Home = () => {
     const { user, setUser } = useAuth();
     const [modules, setModules] = useState([]);
+    const [unlockBanner, setUnlockBanner] = useState(null);
+    const location = useLocation();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (location.state?.unlockTitle) {
+            setUnlockBanner(location.state.unlockTitle);
+            navigate(location.pathname, { replace: true, state: {} });
+            const timer = setTimeout(() => setUnlockBanner(null), 4500);
+            return () => clearTimeout(timer);
+        }
+    }, [location, navigate]);
 
     useEffect(() => {
         const fetchHomeData = async () => {
@@ -40,6 +51,18 @@ const Home = () => {
 
     return (
         <div className="min-h-screen bg-white">
+            {unlockBanner && (
+                <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-[#58cc02] text-white px-5 py-4 rounded-2xl shadow-[0_8px_0_#3b8f1f] border-2 border-white animate-bounce">
+                    <div className="flex items-center gap-3">
+                        <Sparkles size={22} />
+                        <div>
+                            <p className="font-extrabold text-sm uppercase tracking-wide">New Path Unlocked</p>
+                            <p className="font-bold text-lg leading-5">{unlockBanner}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Top Stats Bar */}
             <div className="sticky top-0 bg-white z-10 border-b-2 border-gray-200 p-4 flex justify-between items-center shadow-sm">
                 {/* Logo visible only on mobile, desktop handled by Layout Sidebar */}

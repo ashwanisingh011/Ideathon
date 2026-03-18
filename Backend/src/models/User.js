@@ -14,6 +14,12 @@ const dailyContestEntrySchema = new mongoose.Schema({
   generatedAt: { type: Date, default: Date.now },
 }, { _id: false });
 
+const dailyProgressSchema = new mongoose.Schema({
+  dateKey: { type: String, default: '' },
+  xpEarned: { type: Number, default: 0 },
+  lessonsCompleted: { type: Number, default: 0 },
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -29,6 +35,7 @@ const userSchema = new mongoose.Schema({
     name: { type: String, enum: ['Digital Defender', 'Wealth Weaver', 'Nation Builder'] },
     unlockedAt: { type: Date, default: Date.now }
   }],
+  dailyProgress: { type: dailyProgressSchema, default: () => ({}) },
   dailyContests: { type: [dailyContestEntrySchema], default: [] },
 }, { timestamps: true });
 

@@ -1,5 +1,6 @@
 import { generateDailyContestFromAI, generateQuestionsFromAI } from '../config/geminiConfig.js';
 import User from '../models/User.js';
+import { generateAndPersistModuleContent } from '../services/aiModuleContentService.js';
 
 export const generateNewQuestion = async (req, res) => {
     const { topic, count = 5, userContext = {}, previousQuestions = [], dayLabel = '' } = req.body;
@@ -122,5 +123,54 @@ export const getOrCreateCurrentDayContest = async (req, res) => {
     } catch (error) {
         console.error('Error in getOrCreateCurrentDayContest controller:', error);
         res.status(500).json({ message: 'Failed to get daily contest questions', error: error.message });
+    }
+};
+
+export const generateModuleContent = async (req, res) => {
+    const { moduleId } = req.params;
+    const { username, questionsPerLesson = 5, regenerate = false } = req.body;
+
+    if (!moduleId) {
+        return res.status(400).json({ message: 'moduleId is required' });
+    }
+
+    if (!username) {
+        return res.status(400).json({ message: 'username is required' });
+    }
+
+    try {
+        const user = await User.findOne({ username })
+            .populate('unlockedModules')
+            .populate('completedLessons');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const userContext = {
+            username: user.username,
+            xp: user.xp || 0,
+            currentStreak: user.currentStreak || 0,
+            completedLessonsCount: Array.isArray(user.completedLessons) ? user.completedLessons.length : 0,
+            badges: Array.isArray(user.badges) ? user.badges.map((b) => b.name) : [],
+            unlockedModules: Array.isArray(user.unlockedModules)
+                ? user.unlockedModules.map((m) => m?.title || m?.name).filter(Boolean)
+                : [],
+        };
+
+        const generatedBundle = await generateAndPersistModuleContent({
+            moduleId,
+            userContext,
+            questionsPerLesson,
+            forceRegenerate: Boolean(regenerate),
+        });
+
+        res.status(200).json({
+            message: 'Module content generated successfully',
+            ...generatedBundle,
+        });
+    } catch (error) {
+        console.error('Error in generateModuleContent controller:', error);
+        res.status(500).json({ message: 'Failed to generate module content', error: error.message });
     }
 };

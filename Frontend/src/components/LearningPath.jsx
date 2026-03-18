@@ -54,21 +54,30 @@ const PathNode = ({ module, index, state }) => {
 
 const LearningPath = ({ modules }) => {
     const { user } = useAuth();
-    // Mock Units for MVP - grouping the modules
+    const orderedModules = [...modules].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    // Three visible units mapped by module order.
     const units = [
         {
             title: "Securing Digital India",
             subtitle: "UPI Safety",
             bgColor: "bg-duo-blue",
             btnColor: "bg-duo-blue-dark",
-            modules: modules.slice(0, 3) // Assuming first few are UPI
+            modules: orderedModules.filter((m) => m.order === 1)
         },
         {
             title: "Fueling India's Growth",
             subtitle: "Stock Market Basics",
             bgColor: "bg-duo-green",
             btnColor: "bg-duo-green-dark",
-            modules: modules.slice(3)
+            modules: orderedModules.filter((m) => m.order === 2)
+        },
+        {
+            title: "Building Responsible Citizens",
+            subtitle: "Taxation 101",
+            bgColor: "bg-orange-500",
+            btnColor: "bg-orange-700",
+            modules: orderedModules.filter((m) => m.order === 3)
         }
     ];
 
@@ -77,21 +86,22 @@ const LearningPath = ({ modules }) => {
     // If it is unlocked AND the next module is unlocked, it is COMPLETED.
     // Otherwise, it is LOCKED.
     const getNodeState = (module) => {
-        if (!user || !user.unlockedModules) return 'LOCKED';
+        if (!user || !user.unlockedModules) return module.order <= 2 ? 'CURRENT' : 'LOCKED';
 
         // Find index of this module in the global modules list
-        const currentIndex = modules.findIndex(m => m._id === module._id);
+        const currentIndex = orderedModules.findIndex(m => m._id === module._id);
 
-        // Check if this module is in user's unlockedModules
-        // Also automatically unlock the very first module for brand new users
-        const isUnlocked = currentIndex === 0 || user.unlockedModules.some(m => m._id === module._id || m === module._id);
+        // Baseline unlock: UPI + Stocks are available immediately.
+        const isStarterUnlocked = module.order <= 2;
+        const isUnlockedFromProfile = user.unlockedModules.some(m => m._id === module._id || m === module._id);
+        const isUnlocked = isStarterUnlocked || isUnlockedFromProfile;
 
         if (!isUnlocked) return 'LOCKED';
 
         // If there's a next module, check if it's unlocked
-        if (currentIndex < modules.length - 1) {
-            const nextModule = modules[currentIndex + 1];
-            const isNextUnlocked = user.unlockedModules.some(m => m._id === nextModule._id || m === nextModule._id);
+        if (currentIndex < orderedModules.length - 1) {
+            const nextModule = orderedModules[currentIndex + 1];
+            const isNextUnlocked = nextModule.order <= 2 || user.unlockedModules.some(m => m._id === nextModule._id || m === nextModule._id);
             if (isNextUnlocked) {
                 return 'COMPLETED';
             }
@@ -124,7 +134,7 @@ const LearningPath = ({ modules }) => {
                             return node;
                         })}
                         {/* Fill with empty mock nodes if less than 5 to show winding pattern */}
-                        {unit.modules.length < 5 && Array.from({length: 5 - unit.modules.length}).map((_, i) => (
+                                {unit.modules.length < 3 && Array.from({length: 3 - unit.modules.length}).map((_, i) => (
                              <PathNode
                                 key={`mock-${unitIdx}-${i}`}
                                 module={{_id: 'mock'}}

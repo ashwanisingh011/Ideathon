@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { GET_JWT_SECRET } from '../helper.js';
+import Module from '../models/Module.js';
 
 // Use environment variable or default
 const JWT_SECRET = GET_JWT_SECRET() || 'your_super_secret_key';
@@ -22,7 +23,17 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = await User.create({ username, password: hashedPassword });
+    const starterModules = await Module.find().select('_id').sort({ order: 1 });
+    const user = await User.create({
+      username,
+      password: hashedPassword,
+      unlockedModules: starterModules.map((m) => m._id),
+      dailyProgress: {
+        dateKey: '',
+        xpEarned: 0,
+        lessonsCompleted: 0,
+      },
+    });
 
     const refreshToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
     user.refreshToken = refreshToken;

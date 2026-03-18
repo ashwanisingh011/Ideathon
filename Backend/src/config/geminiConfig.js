@@ -17,6 +17,13 @@ const parseQuestionsJson = (responseText) => {
   return JSON.parse(jsonPayload);
 };
 
+const parseLearningCardsJson = (responseText) => {
+  const cleaned = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
+  const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
+  const jsonPayload = arrayMatch ? arrayMatch[0] : cleaned;
+  return JSON.parse(jsonPayload);
+};
+
 const toSafeString = (value) => (value === undefined || value === null ? '' : String(value));
 
 const buildUserContextBlock = (userContext = {}) => {
@@ -49,9 +56,27 @@ const normalizeQuestions = (questions) => {
     .filter((q) => q.question && q.options.length >= 2);
 };
 
-const generateQuestionsWithFallback = async (prompt) => {
+const normalizeLearningCards = (cards) => {
+  if (!Array.isArray(cards)) return [];
+
+  return cards
+    .filter((card) => card && typeof card === 'object')
+    .map((card, idx) => ({
+      title: toSafeString(card.title || `Card ${idx + 1}`).trim(),
+      text: toSafeString(card.text).trim(),
+      order: Number(card.order) > 0 ? Number(card.order) : idx + 1,
+    }))
+    .filter((card) => card.title && card.text)
+    .sort((a, b) => a.order - b.order);
+};
+
+const generateQuestionsWithFallback = async (prompt, parser = parseQuestionsJson) => {
   let lastError;
   const modelErrors = [];
+
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error('GROQ_API_KEY is not configured');
+  }
 
   for (const modelName of modelCandidates) {
     try {
@@ -71,7 +96,7 @@ const generateQuestionsWithFallback = async (prompt) => {
         throw new Error(`Groq returned an empty response for model ${modelName}`);
       }
 
-      return parseQuestionsJson(responseText);
+      return parser(responseText);
     } catch (error) {
       lastError = error;
       const message = (error?.message || '').toLowerCase();
@@ -95,14 +120,25 @@ const generateQuestionsWithFallback = async (prompt) => {
 };
 
 export const generateQuestionsFromAI = async (topic, count = 5, options = {}) => {
-  const { userContext = {}, previousQuestions = [], dayLabel = '' } = options;
+  const { userContext = {}, previousQuestions = [], dayLabel = '', learningContext = '', lessonOrder = 1 } = options;
   const safeCount = Math.min(Math.max(Number(count) || 5, 5), 10);
   const alreadyUsedQuestions = Array.isArray(previousQuestions)
     ? previousQuestions.map((q) => toSafeString(q?.question)).filter(Boolean)
     : [];
 
-  const prompt = `Generate ${safeCount} multiple-choice questions on the topic of "${topic}" suitable for high school students learning financial literacy.
+  const progressiveLevel = lessonOrder <= 1
+    ? 'Foundation level: definitions and straightforward application'
+    : lessonOrder <= 3
+      ? 'Intermediate level: real-world scenarios and comparisons'
+      : 'Advanced class-12 level: case-based reasoning and nuanced judgment';
+
+  const prompt = `Generate ${safeCount} multiple-choice questions on the topic of "${topic}" suitable for Class 12 students learning financial literacy.
 Contest day: ${dayLabel || 'general'}
+Lesson order: ${lessonOrder}
+Difficulty guidance: ${progressiveLevel}
+
+Base every question on the following learning-card content:
+${learningContext || 'Use lesson and module context only.'}
 
 Use this learner context:
 ${buildUserContextBlock(userContext)}
@@ -173,4 +209,50 @@ export const generateDailyContestFromAI = async ({
     allQuestions,
     days: daysData,
   };
+};
+
+export const generateLearningCardsFromAI = async ({
+  moduleTitle,
+  moduleDescription = '',
+  cardsCount = 4,
+  userContext = {},
+}) => {
+  const safeCount = Math.min(Math.max(Number(cardsCount) || 4, 3), 6);
+  const safeTitle = toSafeString(moduleTitle).trim() || 'Financial Literacy';
+
+  const prompt = `Create ${safeCount} short story-like learning cards for a high-school learner.
+Module title: "${safeTitle}"
+Module description: "${toSafeString(moduleDescription)}"
+
+Use this learner context:
+${buildUserContextBlock(userContext)}
+
+Return strictly a valid JSON array with this structure:
+[
+  {
+    "title": "Card heading",
+    "text": "1-2 short sentences, clear and practical",
+    "order": 1
+  }
+]
+Do not include markdown or extra commentary.`;
+
+  const fallbackCards = [
+    { title: `${safeTitle}: Core Idea`, text: `Understand the basic concept of ${safeTitle} with practical examples from daily life.`, order: 1 },
+    { title: `${safeTitle}: Common Mistakes`, text: `Learn the most frequent mistakes students make and how to avoid them safely.`, order: 2 },
+    { title: `${safeTitle}: Smart Decision`, text: `Apply one simple decision framework to choose the safest and smartest action.`, order: 3 },
+    { title: `${safeTitle}: Practice Check`, text: `Use a quick mental checklist before every real-world transaction or decision.`, order: 4 },
+  ];
+
+  try {
+    const cards = await generateQuestionsWithFallback(prompt, parseLearningCardsJson);
+    const normalizedCards = normalizeLearningCards(cards).slice(0, safeCount);
+    if (normalizedCards.length) {
+      return normalizedCards;
+    }
+  } catch (error) {
+    console.warn('Learning card generation failed, using fallback cards:', error.message);
+  }
+
+  return normalizeLearningCards(fallbackCards).slice(0, safeCount);
 };

@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getLessons, getQuestions, updateProgress } from '../services/api';
+import { getModuleContentBundle, updateProgress } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, X, ArrowRight } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 const LessonPage = () => {
     const { moduleId } = useParams();
     const navigate = useNavigate();
     const { user, setUser } = useAuth();
     const [lessonData, setLessonData] = useState(null);
+    const [lessons, setLessons] = useState([]);
     const [questions, setQuestions] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
@@ -20,18 +21,39 @@ const LessonPage = () => {
     const [shake, setShake] = useState(false);
     const [earnedXP, setEarnedXP] = useState(0);
 
+    const resetQuestionState = () => {
+        setCurrentIndex(0);
+        setSelectedOption(null);
+        setIsAnswerChecked(false);
+        setIsCorrect(false);
+        setAttemptsLeft(2);
+        setShake(false);
+        setEarnedXP(0);
+    };
+
+    const toIdSet = (items = []) => new Set(items.map((item) => (item?._id || item)?.toString()));
+
     useEffect(() => {
         const fetchContent = async () => {
             if(!user) return navigate('/');
             try {
-                // Fetch first lesson of module (For MVP)
-                const lessonsRes = await getLessons(moduleId);
-                const lesson = lessonsRes.data[0];
-                setLessonData(lesson);
+                const bundleRes = await getModuleContentBundle(moduleId);
+                const bundle = bundleRes.data;
 
-                // Fetch questions
-                const qRes = await getQuestions(lesson._id);
-                setQuestions(qRes.data);
+                const orderedLessons = Array.isArray(bundle.lessons) ? bundle.lessons : [];
+                const completedSet = toIdSet(user.completedLessons || []);
+                const lesson = orderedLessons.find((item) => !completedSet.has(item._id?.toString())) || orderedLessons[0];
+
+                if (!lesson) {
+                    setQuestions([]);
+                    setLoading(false);
+                    return;
+                }
+
+                setLessons(orderedLessons);
+                setLessonData(lesson);
+                setQuestions(Array.isArray(lesson.questions) ? lesson.questions : []);
+                resetQuestionState();
                 setLoading(false);
             } catch (err) {
                 console.error(err);
@@ -39,7 +61,7 @@ const LessonPage = () => {
             }
         };
         fetchContent();
-    }, [moduleId]);
+    }, [moduleId, navigate, user]);
 
     const handleCheck = () => {
         if(selectedOption === null) return;
@@ -53,17 +75,16 @@ const LessonPage = () => {
             // Give XP based on attempts left BEFORE this check
             // If they had 2 attempts left when they answered, they get 10 XP.
             // If they had 1 attempt left, they get 5 XP.
-            let xpToGaint = 0;
-            if (attemptsLeft === 2) xpToGaint = 10;
-            else if (attemptsLeft === 1) xpToGaint = 5;
+            let xpToGain = 0;
+            if (attemptsLeft === 2) xpToGain = 10;
+            else if (attemptsLeft === 1) xpToGain = 5;
 
-            setEarnedXP(prev => prev + xpToGaint);
+            setEarnedXP(prev => prev + xpToGain);
         } else {
             setShake(true);
             setTimeout(() => setShake(false), 500);
-            if (attemptsLeft > 0) {
-                setAttemptsLeft(prev => prev - 1);
-            }
+            const nextAttempts = Math.max(attemptsLeft - 1, 0);
+            setAttemptsLeft(nextAttempts);
         }
     };
 
@@ -85,9 +106,24 @@ const LessonPage = () => {
                     username: user.username,
                     lessonId: lessonData._id,
                     xpGained: earnedXP,
-                    moduleId
+                    moduleId,
                 });
-                setUser(res.data); // Update context with new XP
+                const updatedUser = res.data;
+                setUser(updatedUser);
+
+                const completedSet = toIdSet(updatedUser?.completedLessons || []);
+                const currentLessonOrder = lessonData?.order || 0;
+                const nextLesson = lessons.find(
+                    (lesson) => (lesson.order || 0) > currentLessonOrder && !completedSet.has(lesson._id?.toString())
+                );
+
+                if (nextLesson) {
+                    setLessonData(nextLesson);
+                    setQuestions(Array.isArray(nextLesson.questions) ? nextLesson.questions : []);
+                    resetQuestionState();
+                    return;
+                }
+
                 navigate('/home');
             } catch(e) {
                 console.error(e);
@@ -121,7 +157,12 @@ const LessonPage = () => {
             {/* Question Container */}
             <div className="flex-1 p-6 flex flex-col items-center">
                 <div className="w-full flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Select the correct option</h2>
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-800">Select the correct option</h2>
+                        {lessonData?.aiExplanation && (
+                            <p className="text-sm text-gray-500 mt-1">{lessonData.aiExplanation}</p>
+                        )}
+                    </div>
                     <span className="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-sm font-bold shadow-sm">
                         {attemptsLeft} attempts left
                     </span>
@@ -196,7 +237,7 @@ const LessonPage = () => {
                     </button>
                 ) : (
                     <>
-                        {isCorrect || attemptsLeft === 0 ? (
+                        {isCorrect || attemptsLeft <= 0 ? (
                             <button
                                 onClick={handleNext}
                                 className={`w-full max-w-md text-white font-bold py-4 rounded-xl text-lg shadow-[0_4px_0_0] active:translate-y-[4px] active:shadow-none transition-all ${isCorrect ? 'bg-duo-green shadow-[#58a700]' : 'bg-red-500 shadow-[#d32f2f]'}`}
