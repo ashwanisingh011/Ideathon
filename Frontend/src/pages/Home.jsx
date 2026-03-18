@@ -26,6 +26,11 @@ const Home = () => {
                 setModules(modRes.data);
             } catch (err) {
                 console.error(err);
+                if (err.response && err.response.status === 404) {
+                    setUser(null); // Clear local context
+                    localStorage.removeItem('user'); // Clear local storage manually if logout context isn't available
+                    navigate('/');
+                }
             }
         };
         fetchHomeData();
