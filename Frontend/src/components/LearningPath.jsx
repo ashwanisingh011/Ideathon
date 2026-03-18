@@ -3,6 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Star, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
+const normalizeId = (value) => {
+    if (value == null) return null;
+    if (typeof value === 'string' || typeof value === 'number') return String(value);
+    if (typeof value === 'object') {
+        if (value._id != null) return String(value._id);
+        if (value.id != null) return String(value.id);
+    }
+    return null;
+};
+
 const PathNode = ({ module, index, state }) => {
     const navigate = useNavigate();
 
@@ -30,7 +40,7 @@ const PathNode = ({ module, index, state }) => {
 
     const handleClick = () => {
         if (state === 'LOCKED') {
-            alert("Complete previous modules first!");
+            alert("Complete the previous lesson in this unit first.");
         } else {
             // Navigate to Story Mode passing the module ID
             navigate(`/story/${module._id}`);
@@ -55,6 +65,7 @@ const PathNode = ({ module, index, state }) => {
 const LearningPath = ({ modules }) => {
     const { user } = useAuth();
     const orderedModules = [...modules].sort((a, b) => (a.order || 0) - (b.order || 0));
+    const LESSONS_PER_UNIT = 3;
 
     // Three visible units mapped by module order.
     const units = [
@@ -81,36 +92,40 @@ const LearningPath = ({ modules }) => {
         }
     ];
 
-    // Dynamic progress state based on user's unlockedModules
-    // For MVP: a module is CURRENT if it is unlocked and the *next* module in the sequence is NOT unlocked.
-    // If it is unlocked AND the next module is unlocked, it is COMPLETED.
-    // Otherwise, it is LOCKED.
-    const getNodeState = (module) => {
-        if (!user || !user.unlockedModules) return module.order <= 2 ? 'CURRENT' : 'LOCKED';
+    const unlockedModuleIds = new Set(
+        (user?.unlockedModules || [])
+            .map((entry) => normalizeId(entry))
+            .filter(Boolean)
+    );
 
-        // Find index of this module in the global modules list
-        const currentIndex = orderedModules.findIndex(m => m._id === module._id);
+    const completedCountsByModule = (user?.completedLessons || []).reduce((acc, lesson) => {
+        const moduleId = normalizeId(lesson?.moduleId);
+        if (!moduleId) return acc;
+        acc[moduleId] = (acc[moduleId] || 0) + 1;
+        return acc;
+    }, {});
 
-        // Baseline unlock: UPI + Stocks are available immediately.
-        const isStarterUnlocked = module.order <= 2;
-        const isUnlockedFromProfile = user.unlockedModules.some(m => m._id === module._id || m === module._id);
+    // Dynamic lesson-node state within one unit/module:
+    // - COMPLETED: node index is lower than completed lesson count
+    // - CURRENT: first not-yet-completed node
+    // - LOCKED: any node after CURRENT
+    const getNodeState = (module, lessonIndex) => {
+        const moduleId = normalizeId(module?._id);
+        if (!moduleId) return 'LOCKED';
+
+        // First classes in all units should be available by default for smooth onboarding.
+        const isStarterUnlocked = Number(module?.order) <= 3;
+        const isUnlockedFromProfile = unlockedModuleIds.has(moduleId);
         const isUnlocked = isStarterUnlocked || isUnlockedFromProfile;
 
         if (!isUnlocked) return 'LOCKED';
 
-        // If there's a next module, check if it's unlocked
-        if (currentIndex < orderedModules.length - 1) {
-            const nextModule = orderedModules[currentIndex + 1];
-            const isNextUnlocked = nextModule.order <= 2 || user.unlockedModules.some(m => m._id === nextModule._id || m === nextModule._id);
-            if (isNextUnlocked) {
-                return 'COMPLETED';
-            }
-        } else {
-             // If it's the very last module and it's unlocked, let's just make it CURRENT for now
-             // Or if we had a "fully completed path" state, we could use that.
-        }
+        const completedCountRaw = completedCountsByModule[moduleId] || 0;
+        const completedCount = Math.min(completedCountRaw, LESSONS_PER_UNIT);
 
-        return 'CURRENT';
+        if (lessonIndex < completedCount) return 'COMPLETED';
+        if (lessonIndex === completedCount) return 'CURRENT';
+        return 'LOCKED';
     };
 
     return (
@@ -126,21 +141,17 @@ const LearningPath = ({ modules }) => {
                         </div>
                     </div>
 
-                    {/* Winding Path Nodes */}
+                    {/* Winding Path Nodes (3 lesson levels per unit/module) */}
                     <div className="flex flex-col items-center justify-center">
-                        {unit.modules.map((mod, i) => {
-                            const state = getNodeState(mod);
-                            const node = <PathNode key={mod._id} module={mod} index={i} state={state} />;
-                            return node;
-                        })}
-                        {/* Fill with empty mock nodes if less than 5 to show winding pattern */}
-                                {unit.modules.length < 3 && Array.from({length: 3 - unit.modules.length}).map((_, i) => (
-                             <PathNode
-                                key={`mock-${unitIdx}-${i}`}
-                                module={{_id: 'mock'}}
-                                index={unit.modules.length + i}
-                                state='LOCKED'
-                            />
+                        {unit.modules.map((mod) => (
+                            Array.from({ length: LESSONS_PER_UNIT }).map((_, lessonIndex) => (
+                                <PathNode
+                                    key={`${mod._id}-lesson-${lessonIndex}`}
+                                    module={mod}
+                                    index={lessonIndex}
+                                    state={getNodeState(mod, lessonIndex)}
+                                />
+                            ))
                         ))}
                     </div>
                 </div>
