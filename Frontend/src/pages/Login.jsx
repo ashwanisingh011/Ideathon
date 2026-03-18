@@ -25,17 +25,46 @@ const Login = () => {
     
     try {
       if (isLogin) {
-        // Use either username or email field map to username for the backend
-        const res = await loginUser({ username: formData.email || formData.username, password: formData.password });
+        // Validate inputs
+        if (!formData.email && !formData.username) {
+          setError('Please enter username');
+          return;
+        }
+        if (!formData.password) {
+          setError('Please enter password');
+          return;
+        }
+
+        const credentials = { 
+          username: formData.email || formData.username, 
+          password: formData.password 
+        };
+        
+        const res = await loginUser(credentials);
         login(res.data);
         navigate('/home');
       } else {
-        const res = await registerUser({ username: formData.username, password: formData.password });
+        // Validate registration inputs
+        if (!formData.username) {
+          setError('Please enter username');
+          return;
+        }
+        if (!formData.password) {
+          setError('Please enter password');
+          return;
+        }
+
+        const userData = { 
+          username: formData.username, 
+          password: formData.password 
+        };
+        
+        const res = await registerUser(userData);
         login(res.data);
         navigate('/home');
       }
     } catch (err) {
-      setError(isLogin ? 'Failed to login. Try again.' : 'Registration failed. Try again.');
+      setError(err.response?.data?.message || (isLogin ? 'Failed to login. Try again.' : 'Registration failed. Try again.'));
     }
   };
 
