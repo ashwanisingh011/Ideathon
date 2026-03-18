@@ -28,51 +28,6 @@ const toAIQuestionShape = (questionDoc) => ({
   explanation: questionDoc.explanation || '',
 });
 
-const buildFallbackQuestions = (topic, count, lessonOrder = 1) => {
-  const bank = [
-    {
-      question: `In ${topic}, what is the safest first step before making a decision?`,
-      options: ['Act quickly without checking', 'Verify details from trusted source', 'Share credentials with friends', 'Ignore warnings'],
-      correctAnswer: 1,
-      explanation: 'Safe financial behavior starts with verification from trusted sources.',
-    },
-    {
-      question: `For a Class 12 learner, which approach builds long-term confidence in ${topic}?`,
-      options: ['Memorize blindly', 'Understand concept and apply to scenarios', 'Skip explanations', 'Depend on luck'],
-      correctAnswer: 1,
-      explanation: 'Conceptual understanding plus scenario practice improves decision-making quality.',
-    },
-    {
-      question: `Which option best reduces risk while learning ${topic}?`,
-      options: ['One-time learning only', 'Use a simple checklist every time', 'Copy others', 'Avoid asking questions'],
-      correctAnswer: 1,
-      explanation: 'A repeatable checklist prevents common mistakes and improves consistency.',
-    },
-    {
-      question: `As lesson difficulty increases, what should improve first?`,
-      options: ['Guess speed', 'Reasoning depth', 'Message forwarding', 'Ignoring context'],
-      correctAnswer: 1,
-      explanation: 'Higher levels require better reasoning and context-based choices, not faster guessing.',
-    },
-    {
-      question: `How should you treat explanations after each question?`,
-      options: ['Skip them', 'Use them to refine your next decision', 'Read only if wrong', 'Memorize words only'],
-      correctAnswer: 1,
-      explanation: 'Explanations are feedback loops; use them to improve your next choices.',
-    },
-  ];
-
-  return Array.from({ length: count }, (_, idx) => {
-    const q = bank[idx % bank.length];
-    return {
-      question: `[L${lessonOrder}] ${q.question}`,
-      options: q.options,
-      correctAnswer: q.correctAnswer,
-      explanation: q.explanation,
-    };
-  });
-};
-
 export const generateAndPersistModuleContent = async ({
   moduleId,
   userContext = {},
@@ -139,21 +94,16 @@ export const generateAndPersistModuleContent = async ({
     }
 
     const topic = `${moduleDoc.title} - ${lesson.title}`;
-    let generatedQuestions = [];
-    try {
-      generatedQuestions = await generateQuestionsFromAI(topic, safeQuestionsPerLesson, {
-        userContext,
-        previousQuestions: allQuestionsForContext,
-        dayLabel: `lesson-${lesson.order}`,
-        lessonOrder: lesson.order,
-        learningContext: learningContextText,
-      });
-    } catch (error) {
-      generatedQuestions = buildFallbackQuestions(topic, safeQuestionsPerLesson, lesson.order);
-    }
+    const generatedQuestions = await generateQuestionsFromAI(topic, safeQuestionsPerLesson, {
+      userContext,
+      previousQuestions: allQuestionsForContext,
+      dayLabel: `lesson-${lesson.order}`,
+      lessonOrder: lesson.order,
+      learningContext: learningContextText,
+    });
 
     if (!generatedQuestions.length) {
-      generatedQuestions = buildFallbackQuestions(topic, safeQuestionsPerLesson, lesson.order);
+      throw new Error(`AI returned empty question set for lesson ${lesson.title}`);
     }
 
     allQuestionsForContext.push(...generatedQuestions);
