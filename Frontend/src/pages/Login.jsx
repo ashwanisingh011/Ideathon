@@ -36,7 +36,7 @@ const Login = () => {
         }
 
         const credentials = { 
-          username: formData.email || formData.username, 
+          identifier: formData.email || formData.username, 
           password: formData.password 
         };
         
@@ -55,7 +55,8 @@ const Login = () => {
         }
 
         const userData = { 
-          username: formData.username, 
+          username: formData.username,
+          email: formData.email, 
           password: formData.password 
         };
         
