@@ -51,7 +51,10 @@ const StoryCard = () => {
                 const hasQuestionsForEachLesson = lessons.length > 0 && lessons.every(
                     (lesson) => Array.isArray(lesson.questions) && lesson.questions.length > 0
                 );
-                const hasBundleContent = bundleCards.length > 0 && hasQuestionsForEachLesson;
+                const hasAIQuestionsOnly = lessons.length > 0 && lessons.every(
+                    (lesson) => Array.isArray(lesson.questions) && lesson.questions.every((q) => q?.generationSource === 'ai')
+                );
+                const hasBundleContent = bundleCards.length > 0 && hasQuestionsForEachLesson && hasAIQuestionsOnly;
 
                 if (hasBundleContent && moduleFresh) {
                     const mappedFromBundle = mapSlides(bundleCards);

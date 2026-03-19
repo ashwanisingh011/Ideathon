@@ -18,6 +18,8 @@ const toQuestionDocs = (lessonId, questions) => {
     options: q.options,
     correctOptionIndex: q.correctAnswer,
     explanation: q.explanation,
+    generationSource: 'ai',
+    generatedAt: new Date(),
   }));
 };
 
@@ -27,6 +29,11 @@ const toAIQuestionShape = (questionDoc) => ({
   correctAnswer: typeof questionDoc.correctOptionIndex === 'number' ? questionDoc.correctOptionIndex : 0,
   explanation: questionDoc.explanation || '',
 });
+
+const areAllQuestionsAI = (questions = []) => {
+  if (!Array.isArray(questions) || !questions.length) return false;
+  return questions.every((q) => q?.generationSource === 'ai');
+};
 
 export const generateAndPersistModuleContent = async ({
   moduleId,
@@ -79,7 +86,12 @@ export const generateAndPersistModuleContent = async ({
   for (const lesson of lessons) {
     const existingQuestions = await Question.find({ lessonId: lesson._id });
     const hasEnoughExistingQuestions = existingQuestions.length >= safeQuestionsPerLesson;
-    const shouldRegenerateLesson = forceRegenerate || !hasEnoughExistingQuestions || !isFresh(lesson.aiGeneratedAt);
+    const questionsAreAI = areAllQuestionsAI(existingQuestions);
+    const shouldRegenerateLesson =
+      forceRegenerate ||
+      !hasEnoughExistingQuestions ||
+      !isFresh(lesson.aiGeneratedAt) ||
+      !questionsAreAI;
 
     if (!shouldRegenerateLesson) {
       allQuestionsForContext.push(...existingQuestions.map(toAIQuestionShape));
@@ -111,7 +123,9 @@ export const generateAndPersistModuleContent = async ({
     await Question.deleteMany({ lessonId: lesson._id });
     await Question.insertMany(toQuestionDocs(lesson._id, generatedQuestions));
 
-    lesson.aiExplanation = generatedQuestions[0]?.explanation || `In this lesson, you will learn ${lesson.title}.`;
+    lesson.aiExplanation = generatedQuestions[0]?.explanation
+      ? `Level ${lesson.order}: ${generatedQuestions[0].explanation}`
+      : `Level ${lesson.order}: In this lesson, you will learn ${lesson.title}.`;
     lesson.aiGeneratedAt = new Date();
     await lesson.save();
 

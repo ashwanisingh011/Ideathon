@@ -5,7 +5,9 @@ const questionSchema = new mongoose.Schema({
   text: { type: String, required: true },
   options: [{ type: String }],
   correctOptionIndex: { type: Number, required: true },
-  explanation: { type: String }
+  explanation: { type: String },
+  generationSource: { type: String, enum: ['ai'], default: 'ai' },
+  generatedAt: { type: Date, default: Date.now },
 });
 
 export default mongoose.model('Question', questionSchema);
